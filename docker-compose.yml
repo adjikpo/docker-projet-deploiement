@@ -1,15 +1,8 @@
 version: '3.8'
 services:
-  web:
-    build: .
-    ports:
-    - "5000:5000"
+  frontend:
+    image: nginx:1.19
+#    ports:
+#    - "0:5000"
     volumes:
-    - .:/code
-    - logvolume01:/var/log
-    links:
-    - redis
-  redis:
-    image: redis
-volumes:
-  logvolume01: {}
+    - .:/usr/share/nginx/html
