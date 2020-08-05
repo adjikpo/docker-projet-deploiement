@@ -7,7 +7,7 @@ services:
     #    ports:
     #    - "5000:"
     volumes:
-    - .:/usr/share/nginx/html
+    - ./frontend:/usr/share/nginx/html
       #    - logvolume01:/var/log
       #    links:
       #    - redis
@@ -26,3 +26,16 @@ services:
     volumes:
       # So that Traefik can listen to the Docker events
       - /var/run/docker.sock:/var/run/docker.sock
+  backend: 
+    image: php:7.4-apache
+    labels: 
+      - "traefik.http.routers.backend.rule=Host(`backend.docker.localhost`)"
+      - "traefik.http.middlewares.back-mid.headers.accesscontrolallowmethods=GET,OPTIONS,PUT"
+      - "traefik.http.middlewares.back-mid.headers.accesscontrolalloworiginlist=http://frontend.docker.localhost"
+        #      - "traefik.http.middlewares.back-mid.headers.accessControlExposeHeaders=*"
+      - "traefik.http.routers.backend.middlewares=back-mid"
+    volumes:
+      - ./conf/vhost.conf:/etc/apache2/sites-available/000-default.conf
+      - ./backend:/var/www/html
+
+

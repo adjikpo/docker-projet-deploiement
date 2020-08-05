@@ -27,11 +27,20 @@
 
 		// app initial state
 		data: {
-			todos: todoStorage.fetch(),
+			todos: [],
 			newTodo: '',
 			editedTodo: null,
 			visibility: 'all'
 		},
+
+		created: function() {
+			fetch('http://backend.docker.localhost').then((response) => {
+			  return response.json().then((json) => {
+				console.log("JSON", json)
+				this.todos = json
+			  })
+			})
+		  },
 
 		// watch todos change for localStorage persistence
 		watch: {
