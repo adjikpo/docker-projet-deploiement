@@ -36,8 +36,6 @@ services:
       - "traefik.http.middlewares.back-mid.headers.accesscontrolalloworiginlist=http://frontend.docker.localhost"
         #      - "traefik.http.middlewares.back-mid.headers.accessControlExposeHeaders=*"
       - "traefik.http.routers.backend.middlewares=back-mid"
-    volumes:
-      - ./backend:/var/www/html
   mysql:
     image: mysql:5.7
     environment:
@@ -45,5 +43,3 @@ services:
       - MYSQL_PASSWORD=mypassword
       - MYSQL_USER=myuser
       - MYSQL_DATABASE=mydb
-    volumes:
-      - ./mydump:/docker-entrypoint-initdb.d

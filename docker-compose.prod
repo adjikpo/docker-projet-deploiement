@@ -27,9 +27,7 @@ services:
       # So that Traefik can listen to the Docker events
       - /var/run/docker.sock:/var/run/docker.sock
   backend: 
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
+    image: php:7.4-apache
     labels: 
       - "traefik.http.routers.backend.rule=Host(`backend.docker.localhost`)"
       - "traefik.http.middlewares.back-mid.headers.accesscontrolallowmethods=GET,OPTIONS,PUT"
@@ -37,13 +35,7 @@ services:
         #      - "traefik.http.middlewares.back-mid.headers.accessControlExposeHeaders=*"
       - "traefik.http.routers.backend.middlewares=back-mid"
     volumes:
+      - ./conf/vhost.conf:/etc/apache2/sites-available/000-default.conf
       - ./backend:/var/www/html
-  mysql:
-    image: mysql:5.7
-    environment:
-      - MYSQL_RANDOM_ROOT_PASSWORD=yes
-      - MYSQL_PASSWORD=mypassword
-      - MYSQL_USER=myuser
-      - MYSQL_DATABASE=mydb
-    volumes:
-      - ./mydump:/docker-entrypoint-initdb.d
+
+
