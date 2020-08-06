@@ -1,0 +1,22 @@
+FROM composer:1.10 AS build
+ENV buildDir /build
+WORKDIR ${buildDir}
+COPY composer.json ${buildDir}
+COPY composer.lock ${buildDir}
+RUN composer install --no-dev --no-scripts --no-suggest -o -a \
+        --ignore-plateform-reqs
+
+
+FROM php:7.4-apache
+ENV html /var/www/html
+COPY . ${html}
+COPY --from=build ${buildDir}/vendor ${html}
+RUN sed -i 's|DocumentRoot /var/www/html|DocumentRoot ${html}/public|g' /etc/apache2/sites-available/000-default.conf \
+ && docker-php-ext-install pdo pdo_mysql \
+ && a2enmod rewrite \
+ && echo "ServerTokens   Prod" >> /etc/apache2/apache2.conf \
+ && echo "ServerSignature   Off" >> /etc/apache2/apache2.conf
+
+
+ 
+

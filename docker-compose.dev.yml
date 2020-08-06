@@ -1,0 +1,77 @@
+version: '3.8'
+services:
+  frontend:
+    image: nginx:1.19
+    labels:
+      - "traefik.http.routers.frontend.rule=Host(`frontend.docker.localhost`)"
+      - "traefik.docker.network=lory-faycal_gateway-frontend"
+      - "traefik.http.services.frontend.loadbalancer.server.port=80"
+      - "traefik.enable=true"
+      - "traefik.http.routers.frontend.entrypoints=http"
+    volumes:
+    - ./frontend:/usr/share/nginx/html
+    networks:
+      - gateway-frontend
+  reverse-proxy:
+    # The official v2 Traefik docker image
+    image: traefik:v2.2
+    # Enables the web UI and tells Traefik to listen to docker
+    command: --api.insecure=true --providers.docker
+    ports:
+      # The HTTP port
+      - "80:80"
+      # The Web UI (enabled by --api.insecure=true)
+      - "8080:8080"
+    volumes:
+      # So that Traefik can listen to the Docker events
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - gateway-external
+      - gateway-backend
+      - gateway-frontend
+  backend: 
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    labels: 
+      - "traefik.http.routers.backend.rule=Host(`backend.docker.localhost`)"
+      - "traefik.http.middlewares.back-mid.headers.accesscontrolallowmethods=GET,OPTIONS,PUT"
+      - "traefik.http.middlewares.back-mid.headers.accesscontrolalloworiginlist=http://frontend.docker.localhost"
+      - "traefik.docker.network=lory-faycal_gateway-backend"
+      - "traefik.http.services.backend.loadbalancer.server.port=80"
+      - "traefik.http.routers.backend.middlewares=back-mid"
+    volumes:
+      - ./backend:/var/www/html
+    networks:
+      - gateway-backend
+      - backend
+    secrets:
+      - secret_dec
+
+  mysql:
+    image: mysql:5.7
+    environment:
+      - MYSQL_RANDOM_ROOT_PASSWORD=yes
+      - MYSQL_PASSWORD_FILE=/run/secrets/secret_dec
+      - MYSQL_USER=myuser
+      - MYSQL_DATABASE=mydb
+    volumes:
+      - ./mydump:/docker-entrypoint-initdb.d
+    networks:
+      - backend
+    secrets:
+      - secret_dec
+
+secrets:
+  secret_dec:
+     file: ./mysecret.txt
+
+networks:
+  gateway-external:
+    internal: false
+  gateway-backend:
+    internal: true
+  gateway-frontend:
+    internal: true
+  backend:
+    internal: true
