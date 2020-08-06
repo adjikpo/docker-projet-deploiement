@@ -4,13 +4,13 @@ WORKDIR ${buildDir}
 COPY composer.json ${buildDir}
 COPY composer.lock ${buildDir}
 RUN composer install --no-dev --no-scripts --no-suggest -o -a \
-        --ignore-plateform-reqs
+        --ignore-platform-reqs
 
 
 FROM php:7.4-apache
 ENV html /var/www/html
-COPY . ${html}
-COPY --from=build ${buildDir}/vendor ${html}
+COPY --chown=www-data:www-data . ${html}
+COPY --from=build --chown=www-data:www-data /build/vendor ${html}
 RUN sed -i 's|DocumentRoot /var/www/html|DocumentRoot ${html}/public|g' /etc/apache2/sites-available/000-default.conf \
  && docker-php-ext-install pdo pdo_mysql \
  && a2enmod rewrite \

@@ -1,0 +1,26 @@
+name: publish docker images 
+on:
+  push:
+    tags:
+      - v*
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+    - name: copy source
+      uses: actions/checkout@v2
+    - name: install docker
+      run: curl -sSL https://get.docker.com/ | sh
+    - name: Login to github registry
+      run: echo ${{ secrets.TOKEN }} | docker login docker.pkg.github.com -u ${{ github.actor }} --password-stdin
+    - name: Get the version
+      id: get_version
+      run: echo ::set-output name=version::${GITHUB_REF/refs\/tags\//}
+    - name: build the images
+      run: |
+        docker build -f backend/Dockerfile.prod -t docker.pkg.github.com/${{ github.repository }}/dm-php:${{steps.get_version.outputs.version}} .
+        docker build --target=nginx -t docker.pkg.github.com/${{ github.repository }}/dm-nginx:${{steps.get_version.outputs.version}} .
+    - name: publish images 
+      run: |
+        docker push docker.pkg.github.com/${{ github.repository }}/dm-php:${{steps.get_version.outputs.version}}
+        docker push docker.pkg.github.com/${{ github.repository }}/dm-nginx:${{steps.get_version.outputs.version}}
