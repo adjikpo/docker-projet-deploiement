@@ -45,18 +45,26 @@ services:
     networks:
       - gateway-backend
       - backend
+    secrets:
+      - secret_dec
 
   mysql:
     image: mysql:5.7
     environment:
       - MYSQL_RANDOM_ROOT_PASSWORD=yes
-      - MYSQL_PASSWORD=mypassword
+      - MYSQL_PASSWORD_FILE=/run/secrets/secret_dec
       - MYSQL_USER=myuser
       - MYSQL_DATABASE=mydb
     volumes:
       - ./mydump:/docker-entrypoint-initdb.d
     networks:
       - backend
+    secrets:
+      - secret_dec
+
+secrets:
+  secret_dec:
+     file: ./mysecret.txt
 
 networks:
   gateway-external:
