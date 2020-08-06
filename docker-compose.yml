@@ -4,15 +4,14 @@ services:
     image: nginx:1.19
     labels:
       - "traefik.http.routers.frontend.rule=Host(`frontend.docker.localhost`)"
-    #    ports:
-    #    - "5000:"
+      - "traefik.docker.network=lory-faycal_gateway-frontend"
+      - "traefik.http.services.frontend.loadbalancer.server.port=80"
+      - "traefik.enable=true"
+      - "traefik.http.routers.frontend.entrypoints=http"
     volumes:
     - ./frontend:/usr/share/nginx/html
-      #    - logvolume01:/var/log
-      #    links:
-      #    - redis
-      #  redis:
-      #    image: redis
+    networks:
+      - gateway-frontend
   reverse-proxy:
     # The official v2 Traefik docker image
     image: traefik:v2.2
@@ -26,6 +25,10 @@ services:
     volumes:
       # So that Traefik can listen to the Docker events
       - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - gateway-external
+      - gateway-backend
+      - gateway-frontend
   backend: 
     build:
       context: ./backend
@@ -34,10 +37,15 @@ services:
       - "traefik.http.routers.backend.rule=Host(`backend.docker.localhost`)"
       - "traefik.http.middlewares.back-mid.headers.accesscontrolallowmethods=GET,OPTIONS,PUT"
       - "traefik.http.middlewares.back-mid.headers.accesscontrolalloworiginlist=http://frontend.docker.localhost"
-        #      - "traefik.http.middlewares.back-mid.headers.accessControlExposeHeaders=*"
+      - "traefik.docker.network=lory-faycal_gateway-backend"
+      - "traefik.http.services.backend.loadbalancer.server.port=80"
       - "traefik.http.routers.backend.middlewares=back-mid"
     volumes:
       - ./backend:/var/www/html
+    networks:
+      - gateway-backend
+      - backend
+
   mysql:
     image: mysql:5.7
     environment:
@@ -47,3 +55,15 @@ services:
       - MYSQL_DATABASE=mydb
     volumes:
       - ./mydump:/docker-entrypoint-initdb.d
+    networks:
+      - backend
+
+networks:
+  gateway-external:
+    internal: false
+  gateway-backend:
+    internal: true
+  gateway-frontend:
+    internal: true
+  backend:
+    internal: true
