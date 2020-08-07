@@ -1,6 +1,8 @@
 name: publish docker images 
 on:
   push:
+    branches:
+      - mise-en-prod
     tags:
       - v*
 jobs:
@@ -18,8 +20,8 @@ jobs:
       run: echo ::set-output name=version::${GITHUB_REF/refs\/tags\//}
     - name: build the images
       run: |
-        docker build -f backend/Dockerfile.prod -t docker.pkg.github.com/${{ github.repository }}/backend:${{steps.get_version.outputs.version}} .
-        docker build -f frontend/Dockerfile.prod- -t docker.pkg.github.com/${{ github.repository }}/frontend:${{steps.get_version.outputs.version}} .
+        docker build -f backend/Dockerfile-prod -t docker.pkg.github.com/${{ github.repository }}/backend:${{steps.get_version.outputs.version}} backend
+        docker build -f frontend/Dockerfile-prod -t docker.pkg.github.com/${{ github.repository }}/frontend:${{steps.get_version.outputs.version}} frontend
     - name: publish images 
       run: |
         docker push docker.pkg.github.com/${{ github.repository }}/backend:${{steps.get_version.outputs.version}}
