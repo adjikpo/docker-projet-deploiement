@@ -21,6 +21,8 @@ RUN sed -i 's|DocumentRoot /var/www/html|DocumentRoot ${html}/public|g' /etc/apa
  #&& cat toto.txt 
  && mv /usr/local/etc/php/php.ini-production /usr/local/etc/php/php.ini \
  && sed -i 's|expose_php = On|expose_php = Off|g' /usr/local/etc/php/php.ini
+COPY init.sh /init.sh
+ENTRYPOINT ["/init.sh"]
 
 
  
