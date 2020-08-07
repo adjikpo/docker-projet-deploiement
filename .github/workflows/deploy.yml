@@ -18,9 +18,9 @@ jobs:
       run: echo ::set-output name=version::${GITHUB_REF/refs\/tags\//}
     - name: build the images
       run: |
-        docker build -f backend/Dockerfile.prod -t docker.pkg.github.com/${{ github.repository }}/dm-php:${{steps.get_version.outputs.version}} .
-        docker build --target=nginx -t docker.pkg.github.com/${{ github.repository }}/dm-nginx:${{steps.get_version.outputs.version}} .
+        docker build -f backend/Dockerfile.prod -t docker.pkg.github.com/${{ github.repository }}/backend:${{steps.get_version.outputs.version}} .
+        docker build -f frontend/Dockerfile.prod- -t docker.pkg.github.com/${{ github.repository }}/frontend:${{steps.get_version.outputs.version}} .
     - name: publish images 
       run: |
-        docker push docker.pkg.github.com/${{ github.repository }}/dm-php:${{steps.get_version.outputs.version}}
-        docker push docker.pkg.github.com/${{ github.repository }}/dm-nginx:${{steps.get_version.outputs.version}}
+        docker push docker.pkg.github.com/${{ github.repository }}/backend:${{steps.get_version.outputs.version}}
+        docker push docker.pkg.github.com/${{ github.repository }}/frontend:${{steps.get_version.outputs.version}}
