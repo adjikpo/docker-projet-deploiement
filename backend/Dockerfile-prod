@@ -15,7 +15,11 @@ RUN sed -i 's|DocumentRoot /var/www/html|DocumentRoot ${html}/public|g' /etc/apa
  && docker-php-ext-install pdo pdo_mysql \
  && a2enmod rewrite \
  && echo "ServerTokens   Prod" >> /etc/apache2/apache2.conf \
- && echo "ServerSignature   Off" >> /etc/apache2/apache2.conf
+ && echo "ServerSignature   Off" >> /etc/apache2/apache2.conf \
+ # && php -i | grep "Loaded Configuration File" >> toto.txt \
+ #&& cat toto.txt 
+ && mv /usr/local/etc/php/php.ini-production /usr/local/etc/php/php.ini \
+ && sed -i 's|expose_php = On|expose_php = Off|g' /usr/local/etc/php/php.ini
 
 
  
