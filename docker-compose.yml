@@ -1,7 +1,7 @@
 version: '3.8'
 services:
   frontend:
-    image: "docker.pkg.github.com/tolstoyfafa/lory-faycal/backend:${APP_VERSION}"
+    image: "docker.pkg.github.com/tolstoyfafa/lory-faycal/frontend:${APP_VERSION}"
     restart: always
     labels:
       - "traefik.http.routers.frontend.rule=Host(`frontend.docker.localhost`)"

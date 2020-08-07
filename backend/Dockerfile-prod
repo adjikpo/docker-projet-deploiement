@@ -3,6 +3,7 @@ ENV buildDir /build
 WORKDIR ${buildDir}
 COPY composer.json ${buildDir}
 COPY composer.lock ${buildDir}
+COPY src ${buildDir}/src
 RUN composer install --no-dev --no-scripts --no-suggest -o -a \
         --ignore-platform-reqs
 
