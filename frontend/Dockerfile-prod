@@ -1,0 +1,12 @@
+FROM node:12.2.0-alpine AS build
+ENV buildDir /build 
+WORKDIR ${buildDir}
+COPY package.json ${buildDir}
+RUN npm install --silent
+COPY . ${buildDir}
+RUN sed -i 's|node_modules/vue/dist/vue.js|node_modules/vue/dist/vue.min.js|' index.html
+
+FROM nginx:1.19
+ENV html /usr/share/nginx/html
+COPY --from=build --chown=nginx:nginx /build ${html}
+CMD ["nginx","-g","daemon off;"]
