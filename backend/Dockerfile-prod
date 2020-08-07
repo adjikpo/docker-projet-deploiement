@@ -14,14 +14,20 @@ COPY --chown=www-data:www-data . ${html}
 COPY --from=build --chown=www-data:www-data /build/vendor ${html}/vendor
 RUN sed -i 's|DocumentRoot /var/www/html|DocumentRoot ${html}/public|g' /etc/apache2/sites-available/000-default.conf \
  && docker-php-ext-install pdo pdo_mysql \
+ # enable URL rewrriting
  && a2enmod rewrite \
+ # hidde apache infos (not ewxpose them on headers)
  && echo "ServerTokens   Prod" >> /etc/apache2/apache2.conf \
  && echo "ServerSignature   Off" >> /etc/apache2/apache2.conf \
  # && php -i | grep "Loaded Configuration File" >> toto.txt \
  #&& cat toto.txt 
  && mv /usr/local/etc/php/php.ini-production /usr/local/etc/php/php.ini \
- && sed -i 's|expose_php = On|expose_php = Off|g' /usr/local/etc/php/php.ini
+# Not expose php version on http headers
+ && sed -i 's|expose_php = On|expose_php = Off|g' /usr/local/etc/php/php.ini \
+# Tell apache to use system variables
+ && sed -i 's|variables_order = "GPCS"|variables_order = "EGPCS"|g' /usr/local/etc/php/php.ini
 COPY init.sh /init.sh
+RUN chmod +x /init.sh
 ENTRYPOINT ["/init.sh"]
 
 
